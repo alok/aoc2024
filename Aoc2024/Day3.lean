@@ -149,6 +149,3 @@ def day3 (input : String := "input/day3.txt") : IO Nat := do
 end Part2
 
 end Day3
-
-#eval Day3.Part1.day3
-#eval Day3.Part2.day3

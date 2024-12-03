@@ -56,5 +56,3 @@ end Part2
 
 end Day1
 
-#eval Day1.Part1.day1
-#eval Day1.Part2.day1
