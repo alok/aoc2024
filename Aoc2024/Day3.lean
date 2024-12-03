@@ -1,3 +1,4 @@
+import Aoc2024.Basic
 import Std.Internal.Parsec
 open Std Internal Parsec String
 
@@ -14,22 +15,16 @@ def digit : Parser Char := satisfy (·.isDigit)
 
 /-- Parse a number of 1-3 digits -/
 def number : Parser Nat := do
-  let d1 ← digit
-  let d2? ← optional digit
-  let d3? ← optional digit
-  let digits := [d1] ++
-    (match d2? with | some d => [d] | none => []) ++
-    (match d3? with | some d => [d] | none => [])
-  return (String.mk digits).toNat!
+  let (d1, d2?, d3?) := (← digit, ← optional digit, ← optional digit)
+  let digits := #[d1] ++
+    (match d2? with | some d => #[d] | none => #[]) ++
+    (match d3? with | some d => #[d] | none => #[])
+  return (String.mk digits.toList).toNat!
 
-/-- Parse a valid mul instruction of form mul(x,y) where x,y are 1-3 digit numbers -/
+/-- Parse a valid mul instruction of form `mul(x,y)` where `x,y` are 1-3 digit numbers -/
 def mulInstr : Parser MulInstr := do
-  let _ ← pstring "mul("
-  let x ← number
-  let _ ← pchar ','
-  let y ← number
-  let _ ← pchar ')'
-  return { x := x, y := y }
+  let (_,x,_,y,_) := (← pstring "mul(", ← number, ← pchar ',', ← number, ← pchar ')')
+  return {x, y}
 
 /-- Try to parse a mul instruction, return none if invalid -/
 def tryMulInstr (s : String) : Option MulInstr :=
@@ -42,9 +37,9 @@ def MulInstr.eval (instr : MulInstr) : Nat :=
   instr.x * instr.y
 
 /-- Find all valid mul instructions in a string -/
-def findMulInstrs (input : String) : List MulInstr := Id.run do
+def findMulInstrs (input : String) : Array MulInstr := Id.run do
   let chars := input.data
-  let mut instrs := []
+  let mut instrs := #[]
   let mut i := 0
   while h: i < chars.length do
     if hh: i + 3 < chars.length then
@@ -56,14 +51,14 @@ def findMulInstrs (input : String) : List MulInstr := Id.run do
         let rest := String.mk (chars.drop i)
         match tryMulInstr rest with
         | some instr =>
-          instrs := instr :: instrs
+          instrs := instrs.push instr
           i := i + 1
         | none => i := i + 1
       else
         i := i + 1
     else
       i := i + 1
-  return instrs.reverse
+  return instrs
 
 /-- Solve part 1: sum all multiplication results -/
 def solve (input : String) : Nat :=
@@ -106,21 +101,19 @@ inductive Instruction where
   deriving Repr
 
 /-- Find all valid instructions (mul and control) in a string -/
-def findInstructions (input : String) : List Instruction := Id.run do
+def findInstructions (input : String) : Array Instruction := Id.run do
   let chars := input.data
-  let mut instrs := []
+  let mut instrs := #[]
   let mut i := 0
-  while h: i < chars.length do
-    if hh: i + 3 < chars.length then
-      let c1 := chars[i]
-      let c2 := chars[i+1]
-      let c3 := chars[i+2]
+  while i < chars.length do
+    if _h: i + 3 < chars.length then
+      let (c1, c2, c3) := (chars[i], chars[i+1], chars[i+2])
       if (c1 == 'm' && c2 == 'u' && c3 == 'l') then
         -- Try to parse a mul instruction
         let rest := String.mk (chars.drop i)
         match Part1.tryMulInstr rest with
         | some instr =>
-          instrs := Instruction.mul instr :: instrs
+          instrs := instrs.push (.mul instr)
           i := i + 1
         | none => i := i + 1
       else if (c1 == 'd' && c2 == 'o') then
@@ -128,29 +121,24 @@ def findInstructions (input : String) : List Instruction := Id.run do
         let rest := String.mk (chars.drop i)
         match tryControlInstr rest with
         | some ctrl =>
-          instrs := Instruction.ctrl ctrl :: instrs
+          instrs := instrs.push (.ctrl ctrl)
           i := i + 1
         | none => i := i + 1
       else
         i := i + 1
     else
       i := i + 1
-  return instrs.reverse
+  return instrs
 
 /-- Evaluate instructions considering enable/disable state -/
-def evalInstructions (instrs : List Instruction) : Nat := Id.run do
-  let mut sum := 0
-  let mut enabled := true  -- Initially enabled
+def evalInstructions (instrs : Array Instruction) : Nat := Id.run do
+  let mut (sum, enabled) := (0, true)
 
   for instr in instrs do
     match instr with
-    | .mul m =>
-      if enabled then
-        sum := sum + m.eval
-    | .ctrl c =>
-      match c with
-      | .«do()» => enabled := true
-      | .«don't()» => enabled := false
+    | .mul m => if enabled then sum := sum + m.eval
+    | .ctrl .«do()» => enabled := true
+    | .ctrl .«don't()» => enabled := false
 
   return sum
 
