@@ -2,6 +2,14 @@ import Aoc2024.Basic
 
 namespace Day2
 
+/-- Parse a line of space-separated numbers -/
+def parseLine (line : String) : Array Nat :=
+  line.splitOn " "
+    |>.map String.toNat?
+    |>.filter (·.isSome)
+    |>.map (·.get!)
+    |>.toArray
+
 /-- A sequence of numbers is safe if:
 1. All numbers are either increasing or decreasing
 2. Adjacent numbers differ by 1-3 -/
@@ -26,6 +34,23 @@ def safe? (nums : Array Nat) : Bool := Id.run do
 
   return true
 
+namespace Part1
+
+/-- Count safe sequences in input -/
+def solve (input : String) : Nat :=
+  input.splitOn "\n"
+    |>.filter (·.length > 0)
+    |>.map parseLine
+    |>.filter safe?
+    |>.length
+
+def day2 (input : String := "input/day2.txt") : IO Nat := do
+  return solve (← IO.FS.readFile input)
+
+end Part1
+
+namespace Part2
+
 /-- Try removing each number once and check if sequence becomes safe -/
 def safeWithDampener? (nums : Array Nat) : Bool := Id.run do
   -- First check if already safe
@@ -39,39 +64,22 @@ def safeWithDampener? (nums : Array Nat) : Bool := Id.run do
 
   return false
 
-/-- Parse a line of space-separated numbers -/
-def parseLine (line : String) : Array Nat :=
-  line.splitOn " "
-    |>.map String.toNat?
-    |>.filter (·.isSome)
-    |>.map (·.get!)
-    |>.toArray
-
-/-- Count safe sequences in input -/
-def solve1 (input : String) : Nat :=
-  input.splitOn "\n"
-    |>.filter (·.length > 0)
-    |>.map parseLine
-    |>.filter safe?
-    |>.length
-
 /-- Count sequences that are safe with Problem Dampener -/
-def solve2 (input : String) : Nat :=
+def solve (input : String) : Nat :=
   input.splitOn "\n"
     |>.filter (·.length > 0)
     |>.map parseLine
     |>.filter safeWithDampener?
     |>.length
 
-def day2.part1 (input : String := "input/day2.txt") : IO Nat := do
-  let input ← IO.FS.readFile input
-  return solve1 input
+def day2 (input : String := "input/day2.txt") : IO Nat := do
+  return solve (← IO.FS.readFile input)
 
-def day2.part2 (input : String := "input/day2.txt") : IO Nat := do
-  let input ← IO.FS.readFile input
-  return solve2 input
 
-#eval day2.part1
-#eval day2.part2
+
+end Part2
 
 end Day2
+
+#eval Day2.Part1.day2
+#eval Day2.Part2.day2

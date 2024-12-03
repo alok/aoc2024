@@ -62,13 +62,10 @@ def findMulInstrs (input : String) : Array MulInstr := Id.run do
 
 /-- Solve part 1: sum all multiplication results -/
 def solve (input : String) : Nat :=
-  let instrs := findMulInstrs input
-  instrs.map MulInstr.eval |>.sum
+  findMulInstrs input |>.map MulInstr.eval |>.sum
 
 def day3 (input : String := "input/day3.txt") : IO Nat := do
   return solve (← IO.FS.readFile input)
-
-#eval day3
 
 end Part1
 
@@ -103,8 +100,8 @@ inductive Instruction where
 /-- Find all valid instructions (mul and control) in a string -/
 def findInstructions (input : String) : Array Instruction := Id.run do
   let chars := input.data
-  let mut instrs := #[]
-  let mut i := 0
+  let mut (instrs, i) := (#[], 0)
+
   while i < chars.length do
     if _h: i + 3 < chars.length then
       let (c1, c2, c3) := (chars[i], chars[i+1], chars[i+2])
@@ -144,14 +141,14 @@ def evalInstructions (instrs : Array Instruction) : Nat := Id.run do
 
 /-- Solve part 2: sum enabled multiplication results -/
 def solve (input : String) : Nat :=
-  let instrs := findInstructions input
-  evalInstructions instrs
+findInstructions input |> evalInstructions
 
 def day3 (input : String := "input/day3.txt") : IO Nat := do
   return solve (← IO.FS.readFile input)
 
-#eval day3
-
 end Part2
 
 end Day3
+
+#eval Day3.Part1.day3
+#eval Day3.Part2.day3
