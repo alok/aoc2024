@@ -1,0 +1,7 @@
+This is for the Advent of Code 2024.
+
+Prefer `Array` over `List` unless otherwise specified.
+
+For each day, name the main function `dayN` where N is the day number.
+
+Inputs can be downloaded from https://adventofcode.com/2024/day/{N}/input.

@@ -1,0 +1,15 @@
+name = "aoc2024"
+version = "0.1.0"
+defaultTargets = ["aoc2024"]
+
+[[lean_lib]]
+name = "Aoc2024"
+
+[[lean_exe]]
+name = "aoc2024"
+root = "Main"
+
+[[require]]
+name = "Parser"
+git = "https://github.com/fgdorais/lean4-parser"
+rev = "main"
